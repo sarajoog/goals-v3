@@ -1,6 +1,5 @@
 import axios from 'axios'
 import { buildApiUrl } from '@/lib/utils/url'
-import { POST } from '@/app/api/webhooks/route'
 
 type RequestOptions = {
   headers?: Record<string, string>
