@@ -4,9 +4,7 @@ import {
   Mail,
   Phone,
   MapPin,
-  Calendar,
   Shield,
-  Settings,
   Edit,
   Camera,
   Award,
@@ -14,12 +12,56 @@ import {
   TrendingUp,
 } from 'lucide-react'
 import { fetchUserProfile } from '@/lib/services/userService'
-import { UserProfile } from '@/types'
+import { Goal, UserProfile } from '@/types'
 import { useUser } from '@clerk/nextjs'
+
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as z from 'zod'
+import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { postGoal } from '@/lib/services/goalService'
+
+const formSchema = z.object({
+  title: z.string().min(2, 'Title must be at least 2 characters'),
+})
 
 export default function UserAccount() {
   const [userProfile, setuserProfile] = useState<UserProfile | null>(null)
-  const { user } = useUser()
+  const { user, isLoaded } = useUser()
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: '',
+    },
+  })
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { title } = values
+
+    // Handle form submission here
+    const goalData: Goal = {
+      title,
+    }
+
+    try {
+      if (!user?.id) {
+        return
+      }
+      await postGoal(user.id, goalData)
+    } catch (error) {
+      console.log('Failed to create goal:', error)
+    }
+  }
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -39,8 +81,18 @@ export default function UserAccount() {
         console.log('Popular movies loaded')
       }
     }
-    loadUserProfile()
-  }, [user?.id])
+    if (isLoaded) {
+      loadUserProfile()
+    }
+  }, [user?.id, isLoaded])
+
+  if (!isLoaded) {
+    return (
+      <div className='min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 dark:from-slate-900 dark:via-teal-900 dark:to-cyan-900 flex items-center justify-center'>
+        <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-600'></div>
+      </div>
+    )
+  }
 
   const userInfo = {
     name: 'Alex Johnson',
@@ -61,12 +113,6 @@ export default function UserAccount() {
       color: 'text-blue-600',
     },
     {
-      label: 'Total Orders',
-      value: '34',
-      icon: Calendar,
-      color: 'text-green-600',
-    },
-    {
       label: 'Loyalty Points',
       value: '1,256',
       icon: Award,
@@ -78,56 +124,6 @@ export default function UserAccount() {
       icon: Clock,
       color: 'text-orange-600',
     },
-  ]
-
-  const recentOrders = [
-    {
-      id: 'ORD-001',
-      item: 'Premium Subscription',
-      date: '2024-01-15',
-      status: 'Active',
-      amount: '$29.99',
-    },
-    {
-      id: 'ORD-002',
-      item: 'Mobile App Pro',
-      date: '2024-01-10',
-      status: 'Completed',
-      amount: '$19.99',
-    },
-    {
-      id: 'ORD-003',
-      item: 'Cloud Storage 1TB',
-      date: '2024-01-05',
-      status: 'Active',
-      amount: '$9.99',
-    },
-    {
-      id: 'ORD-004',
-      item: 'API Access Plan',
-      date: '2023-12-28',
-      status: 'Expired',
-      amount: '$49.99',
-    },
-  ]
-
-  const preferences = [
-    {
-      category: 'Notifications',
-      setting: 'Email notifications enabled',
-      enabled: true,
-    },
-    {
-      category: 'Privacy',
-      setting: 'Profile visibility: Public',
-      enabled: true,
-    },
-    {
-      category: 'Security',
-      setting: 'Two-factor authentication',
-      enabled: true,
-    },
-    { category: 'Marketing', setting: 'Promotional emails', enabled: false },
   ]
 
   return (
@@ -187,10 +183,6 @@ export default function UserAccount() {
                 <MapPin className='h-4 w-4' />
                 {userInfo.location}
               </div>
-              <div className='flex items-center gap-2 text-muted-foreground'>
-                <Calendar className='h-4 w-4' />
-                Member since {userInfo.joinDate}
-              </div>
             </div>
           </div>
         </div>
@@ -219,93 +211,43 @@ export default function UserAccount() {
           </div>
         ))}
       </div>
-
-      <div className='grid grid-cols-1 lg:grid-cols-2 gap-8'>
-        {/* Recent Orders */}
-        <div className='bg-card rounded-xl p-6 border shadow-sm'>
-          <div className='flex items-center justify-between mb-6'>
-            <div>
-              <h3 className='text-lg font-semibold'>Recent Orders</h3>
-              <p className='text-muted-foreground text-sm'>
-                Your latest purchases and subscriptions
-              </p>
-            </div>
-            <button className='text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium'>
-              View All
-            </button>
-          </div>
-          <div className='space-y-4'>
-            {recentOrders.map(order => (
-              <div
-                key={order.id}
-                className='flex items-center justify-between p-4 bg-muted/20 rounded-lg hover:bg-muted/30 transition-colors'
-              >
-                <div className='flex-1'>
-                  <div className='flex items-center gap-3 mb-1'>
-                    <span className='font-medium'>{order.item}</span>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        order.status === 'Active'
-                          ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                          : order.status === 'Completed'
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400'
-                            : 'bg-gray-100 dark:bg-gray-900/30 text-gray-800 dark:text-gray-400'
-                      }`}
-                    >
-                      {order.status}
-                    </span>
-                  </div>
-                  <p className='text-sm text-muted-foreground'>
-                    {order.id} • {order.date}
-                  </p>
-                </div>
-                <span className='font-semibold'>{order.amount}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Account Preferences */}
-        <div className='bg-card rounded-xl p-6 border shadow-sm'>
-          <div className='flex items-center justify-between mb-6'>
-            <div>
-              <h3 className='text-lg font-semibold'>Account Preferences</h3>
-              <p className='text-muted-foreground text-sm'>
-                Manage your account settings
-              </p>
-            </div>
-            <button className='p-2 bg-muted hover:bg-muted/80 rounded-lg transition-colors'>
-              <Settings className='h-4 w-4' />
-            </button>
-          </div>
-          <div className='space-y-4'>
-            {preferences.map((pref, index) => (
-              <div
-                key={index}
-                className='flex items-center justify-between p-4 bg-muted/20 rounded-lg'
-              >
-                <div>
-                  <p className='font-medium'>{pref.category}</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {pref.setting}
-                  </p>
-                </div>
-                <div
-                  className={`w-12 h-6 rounded-full transition-colors ${
-                    pref.enabled
-                      ? 'bg-blue-500'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                  } relative`}
+      <div className='bg-card rounded-xl p-6 border shadow-sm'>
+        <div>
+          <h3 className='text-lg font-semibold mb-6 text-center'>
+            Add my goal
+          </h3>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className='space-y-4 max-w-2xl mx-auto'
+            >
+              <FormField
+                control={form.control}
+                name='title'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className='sr-only'>Title</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='Enter title'
+                        {...field}
+                        className='w-full'
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div>
+                <Button
+                  type='submit'
+                  className='bg-blue-600 hover:bg-blue-700 text-white'
                 >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                      pref.enabled ? 'translate-x-6' : 'translate-x-0.5'
-                    } absolute top-0.5`}
-                  />
-                </div>
+                  Create
+                </Button>
               </div>
-            ))}
-          </div>
+            </form>
+          </Form>
         </div>
       </div>
     </div>
