@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { buildApiUrl } from '@/lib/utils/url'
+import { buildApiUrl } from '@/utils/url'
 
 type RequestOptions = {
   headers?: Record<string, string>
