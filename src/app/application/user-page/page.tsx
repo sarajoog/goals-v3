@@ -70,15 +70,14 @@ export default function UserAccount() {
       }
       try {
         const userProfile: UserProfile = await fetchUserProfile(user.id)
-        console.log('User Profile:', userProfile)
         if (!userProfile) {
           throw new Error('User profile not found')
         }
         setuserProfile(userProfile)
       } catch (error) {
-        console.error('Error fetching popular movies:', error)
+        console.error('Error fetching user profile:', error)
       } finally {
-        console.log('Popular movies loaded')
+        console.log('User profile loaded')
       }
     }
     if (isLoaded) {

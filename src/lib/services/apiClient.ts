@@ -18,7 +18,6 @@ export const apiClient = {
       ...options?.headers,
       ...(options?.token && { Authorization: `Bearer ${options.token}` }),
     }
-
     const response = await axios.get(url, {
       headers,
       ...options,

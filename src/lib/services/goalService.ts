@@ -11,7 +11,6 @@ export const postGoal = async (userId: string, goal: Goal): Promise<Goal> => {
       throw new Error('Goal title is required')
     }
 
-    console.log('Posting goal for user:', userId, 'Goal:', goal)
     const response = await apiClient.POST<Goal>(
       `user/${userId}/goals`,
       { userId, goal },

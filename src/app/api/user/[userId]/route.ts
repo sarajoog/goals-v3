@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/firebaseAdmin'
 
-export async function GET(request: NextRequest) {
+// Next.js route handlers can receive a context object as the 2nd argument
+export async function GET(
+  request: NextRequest,
+  context: { params: { userId: string } }
+) {
   try {
-    // Extract the userId from query parameters
-    const searchParams = request.nextUrl.searchParams
-    const userId = searchParams.get('userId')
-
+    const { userId } = context.params
     if (!userId) {
+      console.error('Unauthorized access attempt without userId')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

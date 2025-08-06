@@ -1,0 +1,7 @@
+# Test HTTP Endpoints
+# This file contains test endpoints for the API.
+# These endpoints are used for testing purposes and should not be used in production.
+
+# GET Test Endpoint
+http://localhost:3000/api/user/user_30rtbRwEOBlu1dlrkDe5f60JiKF
+
