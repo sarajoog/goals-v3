@@ -7,7 +7,8 @@ export async function GET(
   { params }: { params: { userId: string } }
 ) {
   try {
-    const { userId } = params
+    const awaitedParams = await params
+    const { userId } = awaitedParams
     if (!userId) {
       console.error('Unauthorized access attempt without userId')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
