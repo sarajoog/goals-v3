@@ -5,3 +5,6 @@
 # GET Test Endpoint
 http://localhost:3000/api/user/user_30rtbRwEOBlu1dlrkDe5f60JiKF
 
+
+# GET Test Endpoint
+http://localhost:3000/api/user/user_30rtbRwEOBlu1dlrkDe5f60JiKF/goals

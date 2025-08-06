@@ -1,5 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 import { db } from '@/lib/firebaseAdmin'
+
+export async function GET(
+  _request: Request, // Underscore prefix indicates unused param
+  { params }: { params: { userId: string } }
+) {
+  try {
+    const { userId } = params
+
+    if (!userId) {
+      console.error('Unauthorized access attempt without userId')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Fetch all goals for the user
+    const goalsSnapshot = await db.collection(`users/${userId}/goals`).get()
+    const goals = goalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+
+    return NextResponse.json({ goals })
+  } catch (error) {
+    console.error('Error fetching user goals:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
