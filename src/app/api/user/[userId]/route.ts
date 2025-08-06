@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/firebaseAdmin'
 
 export async function GET(
-  _request: Request, // Underscore prefix indicates unused param
-  { params }: { params: { userId: string } }
+  // Underscore prefix indicates unused param
+  _request: Request,
+  props: { params: Promise<{ userId: string }> }
 ) {
+  const params = await props.params
   try {
     const { userId } = params
 
