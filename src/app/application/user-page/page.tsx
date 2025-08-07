@@ -28,7 +28,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { postGoal } from '@/lib/services/goalService'
+import { getGoals, postGoal } from '@/lib/services/goalService'
 
 const formSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters'),
@@ -37,6 +37,8 @@ const formSchema = z.object({
 export default function UserAccount() {
   const [userProfile, setuserProfile] = useState<UserProfile | null>(null)
   const { user, isLoaded } = useUser()
+  const [countActiveGoal, setCountActiveGoal] = useState<number>(0)
+  //const [countCompletedGoal, setCountCompletedGoal] = useState<number>(0)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,6 +72,12 @@ export default function UserAccount() {
       }
       try {
         const userProfile: UserProfile = await fetchUserProfile(user.id)
+        const goals = await getGoals(user.id)
+        console.log('Fetched goals:', goals)
+        setCountActiveGoal(
+          goals.filter(goal => goal.status === 'active').length
+        )
+        // setCountCompletedGoal(goals.filter(goal => goal.status === 'completed').length)
         if (!userProfile) {
           throw new Error('User profile not found')
         }
@@ -83,7 +91,7 @@ export default function UserAccount() {
     if (isLoaded) {
       loadUserProfile()
     }
-  }, [user?.id, isLoaded])
+  }, [user?.id, isLoaded, countActiveGoal])
 
   if (!isLoaded) {
     return (
@@ -141,6 +149,10 @@ export default function UserAccount() {
           <Edit className='h-4 w-4' />
           Edit Profile
         </button>
+      </div>
+      <div className='border-b border-gray-200 dark:border-gray-700'>
+        <h1>countActiveGoal: {countActiveGoal}</h1>
+        <br />
       </div>
 
       {/* User Info Card */}

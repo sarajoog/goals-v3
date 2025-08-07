@@ -17,7 +17,9 @@ export async function GET(
 
     // Fetch all goals for the user
     const goalsSnapshot = await db.collection(`users/${userId}/goals`).get()
-    const goals = goalsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    const goals = goalsSnapshot.docs.map(doc => {
+      return { id: doc.id, ...doc.data() }
+    })
 
     return NextResponse.json({ goals })
   } catch (error) {

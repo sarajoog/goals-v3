@@ -1,3 +1,5 @@
+import { Goal } from './goal'
+
 export interface UserProfile {
   id: string
   email: string
@@ -6,4 +8,5 @@ export interface UserProfile {
   createdAt: string
   updatedAt?: string
   // Add other fields as needed
+  goals?: Goal[] // Optional, if you want to include goals in the profile
 }
